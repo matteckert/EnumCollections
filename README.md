@@ -29,3 +29,13 @@ Uses [ExtraConstraints](https://github.com/Fody/ExtraConstraints, "ExtraConstrai
 - `TKey` is restricted to `Enum` types.
 - Performance characteristics are similar to the [Java version] (http://docs.oracle.com/javase/7/docs/api/java/util/EnumMap.html "Java EnumMap"). 
 - Worst case access, insert, and delete is constant.
+- `Enum` constants defined with the same value are aliases:
+
+    ```csharp
+    public enum Bird { BlueJay, Stork, Puffin, SeaParrot = 2, Chicken }
+    ...
+    var birdMap = new EnumMap<Bird, int>();
+    birdMap[Bird.Puffin] = 4;
+    birdMap[Bird.SeaParrot] = 5;
+    Assert.IsTrue(birdMap[Bird.Puffin] == 5);
+    ```
