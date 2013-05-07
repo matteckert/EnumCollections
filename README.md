@@ -4,7 +4,7 @@ EnumCollections
 Specialized Enum collections for C#
 -----------------------------------
 
-Uses [ExtraConstraints](https://github.com/Fody/ExtraConstraints, "ExtraConstraints") internally to assure generics are constrained to `Enum` types.
+Uses [ExtraConstraints](https://github.com/Fody/ExtraConstraints "ExtraConstraints") internally to assure generics are constrained to `Enum` types.
 
 ### EnumSet
 - Implements `IFiniteSet<T>`, which extends `ISet<T>` with a `Complement` method.
