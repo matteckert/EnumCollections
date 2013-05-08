@@ -1,4 +1,5 @@
-﻿using ExtraConstraints;
+﻿using System.Diagnostics;
+using ExtraConstraints;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -87,30 +88,30 @@ namespace EnumCollections
         {
             var otherSmallEnumSet = GetSmallEnumSetFrom(other);
 
-            return (otherSmallEnumSet.elements & ~elements) == 0;
-        }
-
-        public override bool IsSupersetOf(IEnumerable<T> other)
-        {
-            var otherSmallEnumSet = GetSmallEnumSetFrom(other);
-
             return (elements & ~otherSmallEnumSet.elements) == 0;
-        }
-
-        public override bool IsProperSupersetOf(IEnumerable<T> other)
-        {
-            var otherSmallEnumSet = GetSmallEnumSetFrom(other);
-
-            return (elements & ~otherSmallEnumSet.elements) == 0
-                && Count > otherSmallEnumSet.Count;
         }
 
         public override bool IsProperSubsetOf(IEnumerable<T> other)
         {
             var otherSmallEnumSet = GetSmallEnumSetFrom(other);
 
-            return (otherSmallEnumSet.elements & ~elements) == 0
+            return (elements & ~otherSmallEnumSet.elements) == 0
                 && Count < otherSmallEnumSet.Count;
+        }
+
+        public override bool IsSupersetOf(IEnumerable<T> other)
+        {
+            var otherSmallEnumSet = GetSmallEnumSetFrom(other);
+
+            return (otherSmallEnumSet.elements & ~elements) == 0;
+        }
+
+        public override bool IsProperSupersetOf(IEnumerable<T> other)
+        {
+            var otherSmallEnumSet = GetSmallEnumSetFrom(other);
+
+            return (otherSmallEnumSet.elements & ~elements) == 0
+                   && Count > otherSmallEnumSet.Count;
         }
 
         public override bool Overlaps(IEnumerable<T> other)

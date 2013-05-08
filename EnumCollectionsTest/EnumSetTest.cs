@@ -116,5 +116,89 @@ namespace EnumCollectionsTest
 
             Assert.IsTrue(a.Count == 7);
         }
+
+        [TestMethod]
+        public void Test_IntersectWithIsGood()
+        {
+            var a = EnumSet<Bird>.Of(Bird.BlueJay, Bird.Chicken, Bird.Puffin);
+            var b = EnumSet<Bird>.Of(Bird.BlueJay, Bird.SeaParrot);
+            a.IntersectWith(b);
+
+            Assert.IsTrue(a == EnumSet<Bird>.Of(Bird.BlueJay, Bird.Puffin));
+        }
+
+        [TestMethod]
+        public void Test_ExceptWith()
+        {
+            var a = EnumSet<Bird>.Of(Bird.BlueJay, Bird.Chicken, Bird.Puffin);
+            var b = EnumSet<Bird>.Of(Bird.BlueJay, Bird.SeaParrot, Bird.Stork);
+            a.ExceptWith(b);
+
+            Assert.IsTrue(a == EnumSet<Bird>.Of(Bird.Chicken));
+        }
+
+        [TestMethod]
+        public void Test_SymmetricExceptWith()
+        {
+            var a = EnumSet<Bird>.Of(Bird.BlueJay, Bird.Chicken, Bird.Puffin);
+            var b = EnumSet<Bird>.Of(Bird.BlueJay, Bird.SeaParrot, Bird.Stork);
+            a.SymmetricExceptWith(b);
+
+            Assert.IsTrue(a == EnumSet<Bird>.Of(Bird.Stork, Bird.Chicken));
+        }
+
+        [TestMethod]
+        public void Test_IsSubsetOf()
+        {
+            var a = EnumSet<Bird>.Of(Bird.BlueJay, Bird.Chicken);
+            var b = EnumSet<Bird>.Of(Bird.BlueJay, Bird.SeaParrot, Bird.Chicken);
+
+            Assert.IsTrue(a.IsSubsetOf(b));
+        }
+
+        [TestMethod]
+        public void Test_SameElementsIsNotProperSubsetOf()
+        {
+            var a = EnumSet<Bird>.Of(Bird.BlueJay, Bird.Chicken, Bird.Puffin);
+            var b = EnumSet<Bird>.Of(Bird.BlueJay, Bird.SeaParrot, Bird.Chicken);
+
+            Assert.IsFalse(a.IsProperSubsetOf(b));
+        }
+
+        [TestMethod]
+        public void Test_IsProperSubsetOf()
+        {
+            var a = EnumSet<Bird>.Of(Bird.BlueJay, Bird.Chicken);
+            var b = EnumSet<Bird>.Of(Bird.BlueJay, Bird.SeaParrot, Bird.Chicken);
+
+            Assert.IsTrue(a.IsProperSubsetOf(b));
+        }
+
+        [TestMethod]
+        public void Test_IsProperSupersetOf()
+        {
+            var a = EnumSet<Bird>.Of(Bird.BlueJay, Bird.Chicken);
+            var b = EnumSet<Bird>.Of(Bird.BlueJay, Bird.SeaParrot, Bird.Chicken);
+
+            Assert.IsTrue(b.IsProperSupersetOf(a));
+        }
+
+        [TestMethod]
+        public void Test_IsSupersetOf()
+        {
+            var a = EnumSet<Bird>.Of(Bird.BlueJay, Bird.Chicken);
+            var b = EnumSet<Bird>.Of(Bird.BlueJay, Bird.SeaParrot, Bird.Chicken);
+
+            Assert.IsTrue(b.IsSupersetOf(a));
+        }
+
+        [TestMethod]
+        public void Test_Overlaps()
+        {
+            var a = EnumSet<Bird>.Of(Bird.BlueJay, Bird.Stork);
+            var b = EnumSet<Bird>.Of(Bird.BlueJay, Bird.SeaParrot, Bird.Chicken);
+
+            Assert.IsTrue(a.Overlaps(b));
+        }
     }
 }

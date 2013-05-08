@@ -129,6 +129,14 @@ namespace EnumCollections
             return !elements.Where((t, i) => (t & ~otherLargeEnumSet.elements[i]) != 0).Any();
         }
 
+        public override bool IsProperSubsetOf(IEnumerable<T> other)
+        {
+            var otherLargeEnumSet = GetLargeEnumSetFrom(other);
+
+            return !elements.Where((t, i) => (t & ~otherLargeEnumSet.elements[i]) != 0).Any() &&
+                   count < otherLargeEnumSet.count;
+        }
+
         public override bool IsSupersetOf(IEnumerable<T> other)
         {
             var otherLargeEnumSet = GetLargeEnumSetFrom(other);
@@ -142,14 +150,6 @@ namespace EnumCollections
 
             return !elements.Where((t, i) => (otherLargeEnumSet.elements[i] & ~t) != 0).Any() &&
                    count > otherLargeEnumSet.count;
-        }
-
-        public override bool IsProperSubsetOf(IEnumerable<T> other)
-        {
-            var otherLargeEnumSet = GetLargeEnumSetFrom(other);
-
-            return !elements.Where((t, i) => (t & ~otherLargeEnumSet.elements[i]) != 0).Any() &&
-                   count < otherLargeEnumSet.count;
         }
 
         public override bool Overlaps(IEnumerable<T> other)
