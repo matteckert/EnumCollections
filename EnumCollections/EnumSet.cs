@@ -1,7 +1,7 @@
-﻿using System;
+﻿using ExtraConstraints;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using ExtraConstraints;
 
 namespace EnumCollections
 {
@@ -212,6 +212,17 @@ namespace EnumCollections
         public static bool operator !=(EnumSet<T> a, EnumSet<T> b)
         {
             return !(a == b);
+        }
+
+        public bool this[T t]
+        {
+            get { return Contains(t); }
+
+            set
+            {
+                if (value) Add(t);
+                else Remove(t);
+            }
         }
     }
 }

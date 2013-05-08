@@ -104,5 +104,17 @@ namespace EnumCollectionsTest
 
             Assert.IsTrue(a.Equals(expectedResult));
         }
+
+        [TestMethod]
+        public void EnumSet_Accessors()
+        {
+            var a = EnumSet<Test>.All();
+
+            a[Test.B] = false;
+            a[Test.A] = false;
+            a[Test.C] = false;
+
+            Assert.IsTrue(a.Count == 7);
+        }
     }
 }

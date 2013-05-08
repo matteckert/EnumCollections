@@ -1,9 +1,8 @@
-﻿using System;
+﻿using ExtraConstraints;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using ExtraConstraints;
-using EnumCollections;
 
 namespace EnumCollections
 {
