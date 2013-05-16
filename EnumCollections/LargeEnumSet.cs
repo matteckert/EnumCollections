@@ -187,29 +187,6 @@ namespace EnumCollections
             return (elements[Ordinal[item] >> 6] & (1UL << Ordinal[item])) != 0;
         }
 
-        public override void CopyTo(T[] array, int arrayIndex)
-        {
-            if (array == null)
-            {
-                throw new ArgumentNullException("array");
-            }
-
-            if (arrayIndex < 0)
-            {
-                throw new ArgumentOutOfRangeException("arrayIndex");
-            }
-
-            if (Count > array.Length - arrayIndex)
-            {
-                throw new ArgumentException("Not enough space in destination array.");
-            }
-
-            foreach (var v in this)
-            {
-                array[arrayIndex++] = v;
-            }
-        }
-
         public override bool Remove(T item)
         {
             var bucket = Ordinal[item] >> 6;
