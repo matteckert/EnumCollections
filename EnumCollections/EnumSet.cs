@@ -9,6 +9,9 @@ namespace EnumCollections
     {
         private static readonly T[] Value = Enum.GetValues(typeof(T)).Cast<T>().Distinct().ToArray();
         private static readonly IDictionary<T, int> Ordinal = new Dictionary<T, int>();
+        private static readonly ulong Mask = 0xFFFFFFFFFFFFFFFF >> (64 - Value.Length);
+
+        private ulong _elements;
 
         static EnumSet()
         {
@@ -17,9 +20,47 @@ namespace EnumCollections
                     Ordinal.Add(Value[i], i);
         }
 
+        class Enumerator : IEnumerator<T>
+        {
+            private readonly EnumSet<T> _enumSet;
+            private int _currentBit;
+
+            public Enumerator(EnumSet<T> enumSet)
+            {
+                _enumSet = enumSet;
+            }
+
+            public bool MoveNext()
+            {
+                if (_enumSet.Count == 0) return false;
+                for (var i = _currentBit; i < Value.Length; i++)
+                {
+                    if ((_enumSet._elements & (1UL << i)) == 0) continue;
+                    Current = Value[i];
+                    _currentBit = i + 1;
+                    return true;
+                }
+                return false;
+            }
+
+            public void Reset()
+            {
+                
+            }
+
+            public T Current { get; private set; }
+
+            object IEnumerator.Current => Current;
+
+            public void Dispose()
+            {
+                
+            }
+        }
+
         public IEnumerator<T> GetEnumerator()
         {
-            throw new NotImplementedException();
+            return new Enumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -27,9 +68,10 @@ namespace EnumCollections
             return GetEnumerator();
         }
 
-        public void Add(T item)
+        public EnumSet()
         {
-            throw new NotImplementedException();
+            Count = 0;
+            IsReadOnly = false;
         }
 
         public void ExceptWith(IEnumerable<T> other)
@@ -82,9 +124,18 @@ namespace EnumCollections
             throw new NotImplementedException();
         }
 
-        bool ISet<T>.Add(T item)
+        public bool Add(T item)
         {
-            throw new NotImplementedException();
+            var previous = _elements;
+            _elements |= 1UL << Ordinal[item];
+            var added = _elements != previous;
+            if (added) Count++;
+            return added;
+        }
+
+        void ICollection<T>.Add(T item)
+        {
+            Add(item);
         }
 
         public void Clear()
@@ -107,8 +158,10 @@ namespace EnumCollections
             throw new NotImplementedException();
         }
 
-        public int Count { get; }
+        public int Count { get; private set; }
         public bool IsReadOnly { get; }
+
+
     }
 
     public abstract class EnumSetTypeConstrainer<TClass> where TClass : class
