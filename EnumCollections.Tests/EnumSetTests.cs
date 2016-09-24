@@ -26,7 +26,7 @@ namespace EnumCollections.Tests
             }
 
             [Test]
-            public void WhenComparedToAnotherEmptyEnumSetOfTheSameType_ThenItShouldBeEqual()
+            public void WhenCompared_ThenShouldBeEqual()
             {
                 CollectionAssert.AreEqual(_enumSet, new EnumSet<EmptyEnum>());
             }
@@ -49,19 +49,19 @@ namespace EnumCollections.Tests
             }
 
             [Test]
-            public void WhenCreated_ThenItShouldHaveNoElements()
+            public void WhenCreated_ThenShouldHaveNoElements()
             {
                 CollectionAssert.IsEmpty(_enumSet);
             }
 
             [Test]
-            public void WhenAnElementHasNotBeenAdded_ThenShouldNotContainElement()
+            public void WhenElementHasNotBeenAddedThenShouldNotContainElement()
             {
                 CollectionAssert.DoesNotContain(_enumSet, SmallEnum.B);
             }
 
             [Test]
-            public void WhenAnElementAdded_ThenShouldContainElement()
+            public void WhenElementAdded_ThenShouldContainElement()
             {
                 _enumSet.Add(SmallEnum.B);
                 CollectionAssert.Contains(_enumSet, SmallEnum.B);
@@ -74,6 +74,14 @@ namespace EnumCollections.Tests
                 _enumSet.Add(SmallEnum.C);
                 CollectionAssert.Contains(_enumSet, SmallEnum.B);
                 CollectionAssert.Contains(_enumSet, SmallEnum.C);
+            }
+
+            [Test]
+            public void WhenTwoElementsAdded_ThenShouldNotContainTheThird()
+            {
+                _enumSet.Add(SmallEnum.B);
+                _enumSet.Add(SmallEnum.C);
+                CollectionAssert.DoesNotContain(_enumSet, SmallEnum.A);
             }
         }
     }
