@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 
 namespace EnumCollections.Tests
 {
@@ -30,22 +31,30 @@ namespace EnumCollections.Tests
             {
                 CollectionAssert.AreEqual(_enumSet, new EnumSet<EmptyEnum>());
             }
+
+            [Test]
+            public void WhenComparedToNullSet_ThenShouldThrow()
+            {
+                Assert.Throws<ArgumentNullException>(() => _enumSet.SetEquals(null));
+            }
         }
 
         [TestFixture]
-        public class GivenASmallEnum
+        public class GivenAnEnumWithElements
         {
-            private EnumSet<SmallEnum> _enumSet;
+            private EnumSet<EnumWithElements> _enumSet;
 
-            public enum SmallEnum
+            public enum EnumWithElements
             {
-                A, B, C
+                A,
+                B,
+                C
             }
 
             [SetUp]
             public void Init()
             {
-                _enumSet = new EnumSet<SmallEnum>();
+                _enumSet = new EnumSet<EnumWithElements>();
             }
 
             [Test]
@@ -57,31 +66,74 @@ namespace EnumCollections.Tests
             [Test]
             public void WhenElementHasNotBeenAddedThenShouldNotContainElement()
             {
-                CollectionAssert.DoesNotContain(_enumSet, SmallEnum.B);
+                CollectionAssert.DoesNotContain(_enumSet, EnumWithElements.B);
             }
 
             [Test]
             public void WhenElementAdded_ThenShouldContainElement()
             {
-                _enumSet.Add(SmallEnum.B);
-                CollectionAssert.Contains(_enumSet, SmallEnum.B);
+                _enumSet.Add(EnumWithElements.B);
+                CollectionAssert.Contains(_enumSet, EnumWithElements.B);
             }
 
             [Test]
             public void WhenTwoElementsAdded_ThenShouldContainBothElements()
             {
-                _enumSet.Add(SmallEnum.B);
-                _enumSet.Add(SmallEnum.C);
-                CollectionAssert.Contains(_enumSet, SmallEnum.B);
-                CollectionAssert.Contains(_enumSet, SmallEnum.C);
+                _enumSet.Add(EnumWithElements.B);
+                _enumSet.Add(EnumWithElements.C);
+                CollectionAssert.Contains(_enumSet, EnumWithElements.B);
+                CollectionAssert.Contains(_enumSet, EnumWithElements.C);
             }
 
             [Test]
             public void WhenTwoElementsAdded_ThenShouldNotContainTheThird()
             {
-                _enumSet.Add(SmallEnum.B);
-                _enumSet.Add(SmallEnum.C);
-                CollectionAssert.DoesNotContain(_enumSet, SmallEnum.A);
+                _enumSet.Add(EnumWithElements.B);
+                _enumSet.Add(EnumWithElements.C);
+                CollectionAssert.DoesNotContain(_enumSet, EnumWithElements.A);
+            }
+        }
+
+        [TestFixture]
+        public class GivenTwoEnums
+        {
+            private EnumSet<EnumWithElements> _a;
+            private EnumSet<EnumWithElements> _b;
+
+            public enum EnumWithElements
+            {
+                A,
+                B,
+                C
+            }
+
+            [SetUp]
+            public void Init()
+            {
+                _a = new EnumSet<EnumWithElements>();
+                _b = new EnumSet<EnumWithElements>();
+            }
+
+            [Test]
+            public void WhenBothSetsAreEmpty_ThenSetsAreEqual()
+            {
+                Assert.IsTrue(_a.SetEquals(_b));
+            }
+
+            [Test]
+            public void WhenSetsHaveSameElements_ThenSetsAreEqual()
+            {
+                _a.Add(EnumWithElements.A);
+                _b.Add(EnumWithElements.A);
+                Assert.IsTrue(_a.SetEquals(_b));
+            }
+
+            [Test]
+            public void WhenSetsHaveDifferentElements_ThenSetsAreNotEqual()
+            {
+                _a.Add(EnumWithElements.A);
+                _b.Add(EnumWithElements.B);
+                Assert.IsFalse(_a.SetEquals(_b));
             }
         }
     }

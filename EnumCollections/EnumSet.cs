@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Resources;
 
 namespace EnumCollections
 {
@@ -111,7 +113,20 @@ namespace EnumCollections
 
         public bool SetEquals(IEnumerable<T> other)
         {
-            throw new NotImplementedException();
+            return _elements == GetEnumSetFrom(other)._elements;
+        }
+
+        private static EnumSet<T> GetEnumSetFrom(IEnumerable<T> other)
+        {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+            var otherEnumSet = other as EnumSet<T>;
+            if (otherEnumSet != null)
+                return otherEnumSet;
+            otherEnumSet = new EnumSet<T>();
+            foreach (var e in other)
+                otherEnumSet.Add(e);
+            return otherEnumSet;
         }
 
         public void SymmetricExceptWith(IEnumerable<T> other)
