@@ -46,10 +46,7 @@ namespace EnumCollections
                 Add(e);
         }
 
-        public bool SetEquals(IEnumerable<T> other)
-        {
-            return _elements == EnumSetFrom(other)._elements;
-        }
+        public bool SetEquals(IEnumerable<T> other) => _elements == EnumSetFrom(other)._elements;
 
         private static EnumSet<T> EnumSetFrom(IEnumerable<T> other)
         {
@@ -76,6 +73,8 @@ namespace EnumCollections
         {
             Add(item);
         }
+
+        public bool Contains(T item) => (_elements & 1UL << Ordinal[item]) != 0;
 
         public void ExceptWith(IEnumerable<T> other)
         {
@@ -123,11 +122,6 @@ namespace EnumCollections
         }
 
         public void Clear()
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Contains(T item)
         {
             throw new NotImplementedException();
         }

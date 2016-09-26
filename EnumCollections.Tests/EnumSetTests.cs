@@ -51,6 +51,11 @@ namespace EnumCollections.Tests
                 C
             }
 
+            private void AssertContains(EnumWithElements element)
+            {
+                Assert.IsTrue(_enumSet.Contains(element));
+            }
+
             [SetUp]
             public void Init()
             {
@@ -64,8 +69,9 @@ namespace EnumCollections.Tests
             }
 
             [Test]
-            public void WhenElementHasNotBeenAddedThenShouldNotContainElement()
+            public void WhenElementHasNotBeenAdded_ThenShouldNotContainElement()
             {
+                Assert.IsFalse(_enumSet.Contains(EnumWithElements.B));
                 CollectionAssert.DoesNotContain(_enumSet, EnumWithElements.B);
             }
 
@@ -73,7 +79,7 @@ namespace EnumCollections.Tests
             public void WhenElementAdded_ThenShouldContainElement()
             {
                 _enumSet.Add(EnumWithElements.B);
-                CollectionAssert.Contains(_enumSet, EnumWithElements.B);
+                AssertContains(EnumWithElements.B);
             }
 
             [Test]
@@ -81,8 +87,8 @@ namespace EnumCollections.Tests
             {
                 _enumSet.Add(EnumWithElements.B);
                 _enumSet.Add(EnumWithElements.C);
-                CollectionAssert.Contains(_enumSet, EnumWithElements.B);
-                CollectionAssert.Contains(_enumSet, EnumWithElements.C);
+                AssertContains(EnumWithElements.B);
+                AssertContains(EnumWithElements.C);
             }
 
             [Test]
