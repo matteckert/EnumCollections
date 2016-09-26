@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Resources;
 
 namespace EnumCollections
 {
@@ -11,9 +9,7 @@ namespace EnumCollections
     {
         private static readonly T[] Value = Enum.GetValues(typeof(T)).Cast<T>().Distinct().ToArray();
         private static readonly IDictionary<T, int> Ordinal = new Dictionary<T, int>();
-        private static readonly ulong Mask = 0xFFFFFFFFFFFFFFFF >> (64 - Value.Length);
-
-        private ulong _elements;
+        //private static readonly ulong Mask = 0xFFFFFFFFFFFFFFFF >> (64 - Value.Length);
 
         static EnumSet()
         {
@@ -22,43 +18,11 @@ namespace EnumCollections
                     Ordinal.Add(Value[i], i);
         }
 
-        class Enumerator : IEnumerator<T>
-        {
-            private readonly EnumSet<T> _enumSet;
-            private int _currentBit;
+        public int Count { get; private set; }
 
-            public Enumerator(EnumSet<T> enumSet)
-            {
-                _enumSet = enumSet;
-            }
+        public bool IsReadOnly { get; }
 
-            public bool MoveNext()
-            {
-                if (_enumSet.Count == 0) return false;
-                for (var i = _currentBit; i < Value.Length; i++)
-                {
-                    if ((_enumSet._elements & (1UL << i)) == 0) continue;
-                    Current = Value[i];
-                    _currentBit = i + 1;
-                    return true;
-                }
-                return false;
-            }
-
-            public void Reset()
-            {
-                
-            }
-
-            public T Current { get; private set; }
-
-            object IEnumerator.Current => Current;
-
-            public void Dispose()
-            {
-                
-            }
-        }
+        private ulong _elements;
 
         public IEnumerator<T> GetEnumerator()
         {
@@ -74,6 +38,43 @@ namespace EnumCollections
         {
             Count = 0;
             IsReadOnly = false;
+        }
+
+        public EnumSet(IEnumerable<T> other) : this()
+        {
+            foreach (var e in other)
+                Add(e);
+        }
+
+        public bool SetEquals(IEnumerable<T> other)
+        {
+            return _elements == EnumSetFrom(other)._elements;
+        }
+
+        private static EnumSet<T> EnumSetFrom(IEnumerable<T> other)
+        {
+            ThrowIfNull(other, nameof(other));
+            return other as EnumSet<T> ?? new EnumSet<T>(other);
+        }
+
+        private static void ThrowIfNull(object argument, string name)
+        {
+            if (argument == null)
+                throw new ArgumentNullException(name);
+        }
+
+        public bool Add(T item)
+        {
+            var previous = _elements;
+            _elements |= 1UL << Ordinal[item];
+            var added = _elements != previous;
+            if (added) Count++;
+            return added;
+        }
+
+        void ICollection<T>.Add(T item)
+        {
+            Add(item);
         }
 
         public void ExceptWith(IEnumerable<T> other)
@@ -111,24 +112,6 @@ namespace EnumCollections
             throw new NotImplementedException();
         }
 
-        public bool SetEquals(IEnumerable<T> other)
-        {
-            return _elements == GetEnumSetFrom(other)._elements;
-        }
-
-        private static EnumSet<T> GetEnumSetFrom(IEnumerable<T> other)
-        {
-            if (other == null)
-                throw new ArgumentNullException(nameof(other));
-            var otherEnumSet = other as EnumSet<T>;
-            if (otherEnumSet != null)
-                return otherEnumSet;
-            otherEnumSet = new EnumSet<T>();
-            foreach (var e in other)
-                otherEnumSet.Add(e);
-            return otherEnumSet;
-        }
-
         public void SymmetricExceptWith(IEnumerable<T> other)
         {
             throw new NotImplementedException();
@@ -137,20 +120,6 @@ namespace EnumCollections
         public void UnionWith(IEnumerable<T> other)
         {
             throw new NotImplementedException();
-        }
-
-        public bool Add(T item)
-        {
-            var previous = _elements;
-            _elements |= 1UL << Ordinal[item];
-            var added = _elements != previous;
-            if (added) Count++;
-            return added;
-        }
-
-        void ICollection<T>.Add(T item)
-        {
-            Add(item);
         }
 
         public void Clear()
@@ -173,10 +142,41 @@ namespace EnumCollections
             throw new NotImplementedException();
         }
 
-        public int Count { get; private set; }
-        public bool IsReadOnly { get; }
+        private class Enumerator : IEnumerator<T>
+        {
+            private readonly EnumSet<T> _enumSet;
+            private int _currentBit;
 
+            public Enumerator(EnumSet<T> enumSet)
+            {
+                _enumSet = enumSet;
+            }
 
+            public bool MoveNext()
+            {
+                if (_enumSet.Count == 0) return false;
+                for (var i = _currentBit; i < Value.Length; i++)
+                {
+                    if ((_enumSet._elements & (1UL << i)) == 0) continue;
+                    Current = Value[i];
+                    _currentBit = i + 1;
+                    return true;
+                }
+                return false;
+            }
+
+            public void Reset()
+            {
+            }
+
+            public T Current { get; private set; }
+
+            object IEnumerator.Current => Current;
+
+            public void Dispose()
+            {
+            }
+        }
     }
 
     public abstract class EnumSetTypeConstrainer<TClass> where TClass : class
