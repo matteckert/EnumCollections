@@ -17,7 +17,7 @@ namespace EnumCollections.Tests
 
             public GivenAnEmptyEnum()
             {
-                _enumSet = new EnumSet<EmptyEnum>();
+                _enumSet = EnumSet.Of<EmptyEnum>();
             }
 
             [Test]
@@ -29,7 +29,7 @@ namespace EnumCollections.Tests
             [Test]
             public void WhenCompared_ThenShouldBeEqual()
             {
-                CollectionAssert.AreEqual(_enumSet, new EnumSet<EmptyEnum>());
+                CollectionAssert.AreEqual(_enumSet, EnumSet.Of<EmptyEnum>());
             }
 
             [Test]
@@ -59,7 +59,7 @@ namespace EnumCollections.Tests
             [SetUp]
             public void Init()
             {
-                _enumSet = new EnumSet<EnumWithElements>();
+                _enumSet = EnumSet.Of<EnumWithElements>();
             }
 
             [Test]
@@ -113,12 +113,14 @@ namespace EnumCollections.Tests
                 C
             }
 
+            public class AClass {}
+
 
             [SetUp]
             public void Init()
             {
-                _a = new EnumSet<EnumWithElements>();
-                _b = new EnumSet<EnumWithElements>();
+                _a = EnumSet.Of<EnumWithElements>();
+                _b = EnumSet.Of<EnumWithElements>();
             }
 
             [Test]
@@ -146,7 +148,8 @@ namespace EnumCollections.Tests
             [Test]
             public void WhenSetsHaveBothSameAndDifferentElements_ThenSymmetricExceptWithGivesOnlyDifferences()
             {
-                var expected = new EnumSet<EnumWithElements> {EnumWithElements.A, EnumWithElements.C};
+                var expected = EnumSet.Of(EnumWithElements.A, EnumWithElements.C);
+
                 _a.Add(EnumWithElements.A);
                 _a.Add(EnumWithElements.B);
                 _b.Add(EnumWithElements.B);

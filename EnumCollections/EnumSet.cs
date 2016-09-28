@@ -2,21 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace EnumCollections
 {
-    public class EnumSet<T> : EnumSetTypeConstrainer<Enum>, ISet<T>
+    public class EnumSet<T> : ISet<T>
     {
         private static readonly T[] Value = Enum.GetValues(typeof(T)).Cast<T>().Distinct().ToArray();
-        private static readonly IDictionary<T, int> Ordinal = new Dictionary<T, int>();
-        //private static readonly ulong Mask = 0xFFFFFFFFFFFFFFFF >> (64 - Value.Length);
+        private static readonly IDictionary<T, int> BitPosition = new Dictionary<T, int>();
 
         static EnumSet()
         {
             for (var i = 0; i < Value.Length; i++)
-                if (!Ordinal.ContainsKey(Value[i]))
-                    Ordinal.Add(Value[i], i);
+                if (!BitPosition.ContainsKey(Value[i]))
+                    BitPosition.Add(Value[i], i);
         }
 
         public int Count { get; private set; }
@@ -35,13 +33,13 @@ namespace EnumCollections
             return GetEnumerator();
         }
 
-        public EnumSet()
+        internal EnumSet()
         {
             Count = 0;
             IsReadOnly = false;
         }
 
-        public EnumSet(IEnumerable<T> other) : this()
+        internal EnumSet(IEnumerable<T> other) : this()
         {
             foreach (var e in other)
                 Add(e);
@@ -64,7 +62,7 @@ namespace EnumCollections
         public bool Add(T item)
         {
             var previous = _elements;
-            _elements |= 1UL << Ordinal[item];
+            _elements |= 1UL << BitPosition[item];
             var added = _elements != previous;
             if (added) Count++;
             return added;
@@ -72,7 +70,7 @@ namespace EnumCollections
 
         void ICollection<T>.Add(T item) => Add(item);
 
-        public bool Contains(T item) => (_elements & 1UL << Ordinal[item]) != 0;
+        public bool Contains(T item) => (_elements & 1UL << BitPosition[item]) != 0;
 
         public void SymmetricExceptWith(IEnumerable<T> other) => _elements ^= EnumSetFrom(other)._elements;
 
@@ -164,11 +162,13 @@ namespace EnumCollections
         }
     }
 
+    public sealed class EnumSet : EnumSetTypeConstrainer<Enum>
+    {
+        private EnumSet() { }
+    }
+
     public abstract class EnumSetTypeConstrainer<TClass> where TClass : class
     {
-        public static EnumSet<T> Of<T>() where T : struct, TClass
-        {
-            return new EnumSet<T>();
-        }
+        public static EnumSet<T> Of<T>(params T[] list) where T : struct, TClass => new EnumSet<T>(list);
     }
 }
