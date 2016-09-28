@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace EnumCollections
 {
@@ -69,12 +70,11 @@ namespace EnumCollections
             return added;
         }
 
-        void ICollection<T>.Add(T item)
-        {
-            Add(item);
-        }
+        void ICollection<T>.Add(T item) => Add(item);
 
         public bool Contains(T item) => (_elements & 1UL << Ordinal[item]) != 0;
+
+        public void SymmetricExceptWith(IEnumerable<T> other) => _elements ^= EnumSetFrom(other)._elements;
 
         public void ExceptWith(IEnumerable<T> other)
         {
@@ -107,11 +107,6 @@ namespace EnumCollections
         }
 
         public bool Overlaps(IEnumerable<T> other)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SymmetricExceptWith(IEnumerable<T> other)
         {
             throw new NotImplementedException();
         }
@@ -159,17 +154,13 @@ namespace EnumCollections
                 return false;
             }
 
-            public void Reset()
-            {
-            }
+            public void Reset() { }
 
             public T Current { get; private set; }
 
             object IEnumerator.Current => Current;
 
-            public void Dispose()
-            {
-            }
+            public void Dispose() { }
         }
     }
 

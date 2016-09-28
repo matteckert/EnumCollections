@@ -113,6 +113,7 @@ namespace EnumCollections.Tests
                 C
             }
 
+
             [SetUp]
             public void Init()
             {
@@ -140,6 +141,18 @@ namespace EnumCollections.Tests
                 _a.Add(EnumWithElements.A);
                 _b.Add(EnumWithElements.B);
                 Assert.IsFalse(_a.SetEquals(_b));
+            }
+
+            [Test]
+            public void WhenSetsHaveBothSameAndDifferentElements_ThenSymmetricExceptWithGivesOnlyDifferences()
+            {
+                var expected = new EnumSet<EnumWithElements> {EnumWithElements.A, EnumWithElements.C};
+                _a.Add(EnumWithElements.A);
+                _a.Add(EnumWithElements.B);
+                _b.Add(EnumWithElements.B);
+                _b.Add(EnumWithElements.C);
+                _a.SymmetricExceptWith(_b);
+                Assert.IsTrue(_a.SetEquals(expected));
             }
         }
     }
