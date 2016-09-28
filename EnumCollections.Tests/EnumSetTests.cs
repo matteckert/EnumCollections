@@ -9,27 +9,27 @@ namespace EnumCollections.Tests
         [TestFixture]
         public class GivenAnEmptyEnum
         {
-            private readonly EnumSet<EmptyEnum> _enumSet;
+            private readonly EnumSet<E> _enumSet;
 
-            public enum EmptyEnum
+            public enum E
             {
             }
 
             public GivenAnEmptyEnum()
             {
-                _enumSet = EnumSet.Of<EmptyEnum>();
+                _enumSet = EnumSet.Of<E>();
             }
 
             [Test]
             public void WhenCreated_ShouldBeAnEnumSet()
             {
-                Assert.IsInstanceOf<EnumSet<EmptyEnum>>(_enumSet);
+                Assert.IsInstanceOf<EnumSet<E>>(_enumSet);
             }
 
             [Test]
             public void WhenCompared_ThenShouldBeEqual()
             {
-                CollectionAssert.AreEqual(_enumSet, EnumSet.Of<EmptyEnum>());
+                CollectionAssert.AreEqual(_enumSet, EnumSet.Of<E>());
             }
 
             [Test]
@@ -42,16 +42,16 @@ namespace EnumCollections.Tests
         [TestFixture]
         public class GivenAnEnumWithElements
         {
-            private EnumSet<EnumWithElements> _enumSet;
+            private EnumSet<E> _enumSet;
 
-            public enum EnumWithElements
+            public enum E
             {
                 A,
                 B,
                 C
             }
 
-            private void AssertContains(EnumWithElements element)
+            private void AssertContains(E element)
             {
                 Assert.IsTrue(_enumSet.Contains(element));
             }
@@ -59,7 +59,7 @@ namespace EnumCollections.Tests
             [SetUp]
             public void Init()
             {
-                _enumSet = EnumSet.Of<EnumWithElements>();
+                _enumSet = EnumSet.Of<E>();
             }
 
             [Test]
@@ -69,44 +69,65 @@ namespace EnumCollections.Tests
             }
 
             [Test]
-            public void WhenElementHasNotBeenAdded_ThenShouldNotContainElement()
+            public void WhenCreated_ThenCountShouldBeZero()
             {
-                Assert.IsFalse(_enumSet.Contains(EnumWithElements.B));
-                CollectionAssert.DoesNotContain(_enumSet, EnumWithElements.B);
+                Assert.IsTrue(_enumSet.Count == 0);
             }
 
             [Test]
-            public void WhenElementAdded_ThenShouldContainElement()
+            public void WhenCreated_ThenShouldNotContainElement()
             {
-                _enumSet.Add(EnumWithElements.B);
-                AssertContains(EnumWithElements.B);
+                Assert.IsFalse(_enumSet.Contains(E.B));
+                CollectionAssert.DoesNotContain(_enumSet, E.B);
             }
 
             [Test]
-            public void WhenTwoElementsAdded_ThenShouldContainBothElements()
+            public void WhenOneElement_ThenCountShouldBeOne()
             {
-                _enumSet.Add(EnumWithElements.B);
-                _enumSet.Add(EnumWithElements.C);
-                AssertContains(EnumWithElements.B);
-                AssertContains(EnumWithElements.C);
+                _enumSet.Add(E.B);
+                Assert.IsTrue(_enumSet.Count == 1);
             }
 
             [Test]
-            public void WhenTwoElementsAdded_ThenShouldNotContainTheThird()
+            public void WhenOneElement_ThenShouldContainElement()
             {
-                _enumSet.Add(EnumWithElements.B);
-                _enumSet.Add(EnumWithElements.C);
-                CollectionAssert.DoesNotContain(_enumSet, EnumWithElements.A);
+                _enumSet.Add(E.B);
+                AssertContains(E.B);
+            }
+
+            [Test]
+            public void WhenMultipleElements_ThenCountShouldBeNumberOfElements()
+            {
+                _enumSet.Add(E.B);
+                _enumSet.Add(E.C);
+                Assert.IsTrue(_enumSet.Count == 2);
+            }
+
+            [Test]
+            public void WhenMultipleElements_ThenShouldContainAllElements()
+            {
+                _enumSet.Add(E.B);
+                _enumSet.Add(E.C);
+                AssertContains(E.B);
+                AssertContains(E.C);
+            }
+
+            [Test]
+            public void WhenNotAllElements_ThenShouldNotContainElementsNotAdded()
+            {
+                _enumSet.Add(E.B);
+                _enumSet.Add(E.C);
+                CollectionAssert.DoesNotContain(_enumSet, E.A);
             }
         }
 
         [TestFixture]
         public class GivenTwoEnums
         {
-            private EnumSet<EnumWithElements> _a;
-            private EnumSet<EnumWithElements> _b;
+            private EnumSet<E> _a;
+            private EnumSet<E> _b;
 
-            public enum EnumWithElements
+            public enum E
             {
                 A,
                 B,
@@ -119,41 +140,41 @@ namespace EnumCollections.Tests
             [SetUp]
             public void Init()
             {
-                _a = EnumSet.Of<EnumWithElements>();
-                _b = EnumSet.Of<EnumWithElements>();
+                _a = EnumSet.Of<E>();
+                _b = EnumSet.Of<E>();
             }
 
             [Test]
-            public void WhenBothSetsAreEmpty_ThenSetsAreEqual()
+            public void WhenEmpty_ThenEqual()
             {
                 Assert.IsTrue(_a.SetEquals(_b));
             }
 
             [Test]
-            public void WhenSetsHaveSameElements_ThenSetsAreEqual()
+            public void WhenSameElements_ThenEqual()
             {
-                _a.Add(EnumWithElements.A);
-                _b.Add(EnumWithElements.A);
+                _a.Add(E.A);
+                _b.Add(E.A);
                 Assert.IsTrue(_a.SetEquals(_b));
             }
 
             [Test]
-            public void WhenSetsHaveDifferentElements_ThenSetsAreNotEqual()
+            public void WhenDifferentElements_ThenNotEqual()
             {
-                _a.Add(EnumWithElements.A);
-                _b.Add(EnumWithElements.B);
+                _a.Add(E.A);
+                _b.Add(E.B);
                 Assert.IsFalse(_a.SetEquals(_b));
             }
 
             [Test]
-            public void WhenSetsHaveBothSameAndDifferentElements_ThenSymmetricExceptWithGivesOnlyDifferences()
+            public void WhenSameAndDifferentElements_ThenSymmetricExceptWithGivesDifferences()
             {
-                var expected = EnumSet.Of(EnumWithElements.A, EnumWithElements.C);
+                var expected = EnumSet.Of(E.A, E.C);
 
-                _a.Add(EnumWithElements.A);
-                _a.Add(EnumWithElements.B);
-                _b.Add(EnumWithElements.B);
-                _b.Add(EnumWithElements.C);
+                _a.Add(E.A);
+                _a.Add(E.B);
+                _b.Add(E.B);
+                _b.Add(E.C);
                 _a.SymmetricExceptWith(_b);
                 Assert.IsTrue(_a.SetEquals(expected));
             }
