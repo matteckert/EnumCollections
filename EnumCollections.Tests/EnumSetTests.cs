@@ -1,13 +1,30 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using static EnumCollections.Tests.E;
 
 namespace EnumCollections.Tests
 {
     public enum E { A, B, C }
 
+    public enum TooBig {
+        E00, E01, E02, E03, E04, E05, E06, E07, E08, E09,
+        E10, E11, E12, E13, E14, E15, E16, E17, E18, E19,
+        E20, E21, E22, E23, E24, E25, E26, E27, E28, E29,
+        E30, E31, E32, E33, E34, E35, E36, E37, E38, E39,
+        E40, E41, E42, E43, E44, E45, E46, E47, E48, E49,
+        E50, E51, E52, E53, E54, E55, E56, E57, E58, E59,
+        E60, E61, E62, E63, E64, E65, E66, E67, E68, E69
+    }
+
     [TestFixture]
     public class EnumSetTests
     {
+        [Test]
+        public void WhenAnEnumTooBig_ThenThrows()
+        {
+            Assert.That(() => EnumSet.Of<TooBig>(), Throws.TypeOf<TypeInitializationException>());
+        }
+
         [Test]
         public void WhenCreated_ThenAnEnumSet()
         {
@@ -146,6 +163,15 @@ namespace EnumCollections.Tests
             Assert.That(a.SetEquals(EnumSet.Of(B)));
         }
 
+        [Test]
+        public void WhenSameAndDifferentElements_ThenUnionWithAddsDifferentElements()
+        {
+            var a = EnumSet.Of(A, B);
+            var b = EnumSet.Of(B, C);
+            a.UnionWith(b);
+            Assert.That(a.SetEquals(EnumSet.Of(A, B, C)));
+        }
+
         [TestCase(ExpectedResult = true)]
         [TestCase(A, ExpectedResult = true)]
         [TestCase(B, ExpectedResult = true)]
@@ -196,6 +222,60 @@ namespace EnumCollections.Tests
         public bool IsSupersetOf_AB(params E[] elements)
         {
             return EnumSet.Of(elements).IsSupersetOf(EnumSet.Of(A, B));
+        }
+
+        [TestCase(ExpectedResult = false)]
+        [TestCase(A, ExpectedResult = true)]
+        [TestCase(B, ExpectedResult = true)]
+        [TestCase(C, ExpectedResult = false)]
+        [TestCase(A, B, ExpectedResult = true)]
+        [TestCase(A, C, ExpectedResult = true)]
+        [TestCase(B, C, ExpectedResult = true)]
+        [TestCase(A, B, C, ExpectedResult = true)]
+        public bool Overlaps_AB(params E[] elements)
+        {
+            return EnumSet.Of(elements).Overlaps(EnumSet.Of(A, B));
+        }
+
+        [Test]
+        public void WhenCleared_CountIsZero()
+        {
+            var a = EnumSet.Of(A, B, C);
+            a.Clear();
+            Assert.That(a.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void WhenCopiedToNullArray_ThenThrows()
+        {
+            Assert.That(() => EnumSet.Of(A, B, C).CopyTo(null, 0), Throws.ArgumentNullException);
+        }
+
+        [Test]
+        public void WhenCopiedToArrayWithTooFewElements_ThenThrows()
+        {
+            Assert.That(() => EnumSet.Of(A, B, C).CopyTo(new E[2], 0), Throws.ArgumentException);
+        }
+
+        [Test]
+        public void WhenCopiedToIndexWithTooFewElementsRemaining_ThenThrows()
+        {
+            Assert.That(() => EnumSet.Of(A, B, C).CopyTo(new E[3], 1), Throws.ArgumentException);
+        }
+
+        [Test]
+        public void WhenCopyIndexIsLessThanZero_ThenThrows()
+        {
+            Assert.That(() => EnumSet.Of(A, B, C).CopyTo(new E[3], -1), Throws.TypeOf<ArgumentOutOfRangeException>());
+        }
+
+        [Test]
+        public void WhenCopiedToArray_ArrayHasAllElements()
+        {
+            var a = EnumSet.Of(A, B, C);
+            var array = new E[3];
+            a.CopyTo(array, 0);
+            Assert.That(array, Is.EquivalentTo(new [] {A, B, C}));
         }
     }
 }

@@ -13,12 +13,21 @@ namespace EnumCollections
 
         static EnumSet()
         {
+            if (Value.Length > 64)
+                throw new ArgumentException("Enum must have 64 constants or less");
             for (var i = 0; i < Value.Length; i++)
                 if (!BitPosition.ContainsKey(Value[i]))
                     BitPosition.Add(Value[i], i);
         }
 
-        public int Count { get; private set; }
+        private static int CountBits(ulong v)
+        {
+            v = v - (v >> 1 & 0x5555555555555555UL);
+            v = (v & 0x3333333333333333UL) + (v >> 2 & 0x3333333333333333UL);
+            return (int)((v + (v >> 4) & 0xF0F0F0F0F0F0F0FUL) * 0x101010101010101UL >> 56);
+        }
+
+        public int Count => CountBits(_elements);
 
         public bool IsReadOnly { get; }
 
@@ -36,7 +45,6 @@ namespace EnumCollections
 
         internal EnumSet()
         {
-            Count = 0;
             IsReadOnly = false;
         }
 
@@ -51,27 +59,28 @@ namespace EnumCollections
 
         private static EnumSet<T> EnumSetFrom(IEnumerable<T> other)
         {
-            if (other == null)
-                throw new ArgumentNullException(nameof(other));
+            ThrowIfNull(other, nameof(other));
             return other as EnumSet<T> ?? new EnumSet<T>(other);
+        }
+
+        private static void ThrowIfNull(object argument, string name)
+        {
+            if (argument == null)
+                throw new ArgumentNullException(name);
         }
 
         public bool Add(T item)
         {
             var previous = _elements;
             _elements |= 1UL << BitPosition[item];
-            var added = _elements != previous;
-            if (added) Count++;
-            return added;
+            return _elements != previous;
         }
 
         public bool Remove(T item)
         {
             var previous = _elements;
             _elements &= ~(1UL << BitPosition[item]);
-            var removed = _elements != previous;
-            if (removed) Count--;
-            return removed;
+            return _elements != previous;
         }
 
         void ICollection<T>.Add(T item) => 
@@ -107,24 +116,24 @@ namespace EnumCollections
         public bool IsSupersetOf(IEnumerable<T> other) => 
             IsSubset(EnumSetFrom(other), this);
 
-        public bool Overlaps(IEnumerable<T> other)
-        {
-            throw new NotImplementedException();
-        }
+        public bool Overlaps(IEnumerable<T> other) => 
+            (_elements & EnumSetFrom(other)._elements) != 0;
 
-        public void UnionWith(IEnumerable<T> other)
-        {
-            throw new NotImplementedException();
-        }
+        public void UnionWith(IEnumerable<T> other) =>
+            _elements |= EnumSetFrom(other)._elements;
 
-        public void Clear()
-        {
-            throw new NotImplementedException();
-        }
+        public void Clear() =>
+            _elements = 0;
 
-        public void CopyTo(T[] array, int arrayIndex)
+        public void CopyTo(T[] array, int index)
         {
-            throw new NotImplementedException();
+            ThrowIfNull(array, nameof(array));
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            if (Count > array.Length - index)
+                throw new ArgumentException("Not enough space in " + nameof(array));
+            foreach (var e in this)
+                array[index++] = e;
         }
 
         private class Enumerator : IEnumerator<T>
