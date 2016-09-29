@@ -51,14 +51,9 @@ namespace EnumCollections
 
         private static EnumSet<T> EnumSetFrom(IEnumerable<T> other)
         {
-            ThrowIfNull(other, nameof(other));
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
             return other as EnumSet<T> ?? new EnumSet<T>(other);
-        }
-
-        private static void ThrowIfNull(object argument, string name)
-        {
-            if (argument == null)
-                throw new ArgumentNullException(name);
         }
 
         public bool Add(T item)
