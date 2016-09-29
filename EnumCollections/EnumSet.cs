@@ -91,30 +91,26 @@ namespace EnumCollections
         public void ExceptWith(IEnumerable<T> other) =>
             _elements &= ~EnumSetFrom(other)._elements;
 
-        public void IntersectWith(IEnumerable<T> other)
-        {
-            throw new NotImplementedException();
-        }
+        public void IntersectWith(IEnumerable<T> other) => 
+            _elements &= EnumSetFrom(other)._elements;
 
-        public bool IsProperSubsetOf(IEnumerable<T> other)
-        {
-            throw new NotImplementedException();
-        }
+        private static bool IsSubset(EnumSet<T> a, EnumSet<T> b) => 
+            (a._elements & ~b._elements) == 0;
 
-        public bool IsProperSupersetOf(IEnumerable<T> other)
-        {
-            throw new NotImplementedException();
-        }
+        private static bool IsProperSubset(EnumSet<T> a, EnumSet<T> b) => 
+            IsSubset(a, b) && a.Count < b.Count;
 
-        public bool IsSubsetOf(IEnumerable<T> other)
-        {
-            throw new NotImplementedException();
-        }
+        public bool IsProperSubsetOf(IEnumerable<T> other) =>
+            IsProperSubset(this, EnumSetFrom(other));
 
-        public bool IsSupersetOf(IEnumerable<T> other)
-        {
-            throw new NotImplementedException();
-        }
+        public bool IsSubsetOf(IEnumerable<T> other) =>
+            IsSubset(this, EnumSetFrom(other)); 
+
+        public bool IsProperSupersetOf(IEnumerable<T> other) =>
+            IsProperSubset(EnumSetFrom(other), this);
+
+        public bool IsSupersetOf(IEnumerable<T> other) => 
+            IsSubset(EnumSetFrom(other), this);
 
         public bool Overlaps(IEnumerable<T> other)
         {

@@ -120,10 +120,11 @@ namespace EnumCollections.Tests
         }
 
         [Test]
-        public void WhenSameAndDifferentElements_ThenSymmetricExceptWithGivesDifferences()
+        public void WhenSameAndDifferentElements_ThenSymmetricExceptWithKeepsOnlyDifferentElements()
         {
             var a = EnumSet.Of(A, B);
-            a.SymmetricExceptWith(EnumSet.Of(B, C));
+            var b = EnumSet.Of(B, C);
+            a.SymmetricExceptWith(b);
             Assert.That(a.SetEquals(EnumSet.Of(A, C)));
         }
 
@@ -131,8 +132,70 @@ namespace EnumCollections.Tests
         public void WhenSameAndDifferentElements_ThenExceptWithRemovesSameElements()
         {
             var a = EnumSet.Of(A, B);
-            a.ExceptWith(EnumSet.Of(B));
+            var b = EnumSet.Of(B);
+            a.ExceptWith(b);
             Assert.That(a.SetEquals(EnumSet.Of(A)));
+        }
+
+        [Test]
+        public void WhenSameAndDifferentElements_ThenIntersectWithKeepsOnlySameElements()
+        {
+            var a = EnumSet.Of(A, B);
+            var b = EnumSet.Of(B, C);
+            a.IntersectWith(b);
+            Assert.That(a.SetEquals(EnumSet.Of(B)));
+        }
+
+        [TestCase(ExpectedResult = true)]
+        [TestCase(A, ExpectedResult = true)]
+        [TestCase(B, ExpectedResult = true)]
+        [TestCase(C, ExpectedResult = false)]
+        [TestCase(A, B, ExpectedResult = false)]
+        [TestCase(A, C, ExpectedResult = false)]
+        [TestCase(B, C, ExpectedResult = false)]
+        [TestCase(A, B, C, ExpectedResult = false)]
+        public bool IsProperSubsetOf_AB(params E[] elements)
+        {
+            return EnumSet.Of(elements).IsProperSubsetOf(EnumSet.Of(A, B));
+        }
+
+        [TestCase(ExpectedResult = true)]
+        [TestCase(A, ExpectedResult = true)]
+        [TestCase(B, ExpectedResult = true)]
+        [TestCase(C, ExpectedResult = false)]
+        [TestCase(A, B, ExpectedResult = true)]
+        [TestCase(A, C, ExpectedResult = false)]
+        [TestCase(B, C, ExpectedResult = false)]
+        [TestCase(A, B, C, ExpectedResult = false)]
+        public bool IsSubsetOf_AB(params E[] elements)
+        {
+            return EnumSet.Of(elements).IsSubsetOf(EnumSet.Of(A, B));
+        }
+
+        [TestCase(ExpectedResult = false)]
+        [TestCase(A, ExpectedResult = false)]
+        [TestCase(B, ExpectedResult = false)]
+        [TestCase(C, ExpectedResult = false)]
+        [TestCase(A, B, ExpectedResult = false)]
+        [TestCase(A, C, ExpectedResult = false)]
+        [TestCase(B, C, ExpectedResult = false)]
+        [TestCase(A, B, C, ExpectedResult = true)]
+        public bool IsProperSupersetOf_AB(params E[] elements)
+        {
+            return EnumSet.Of(elements).IsProperSupersetOf(EnumSet.Of(A, B));
+        }
+
+        [TestCase(ExpectedResult = false)]
+        [TestCase(A, ExpectedResult = false)]
+        [TestCase(B, ExpectedResult = false)]
+        [TestCase(C, ExpectedResult = false)]
+        [TestCase(A, B, ExpectedResult = true)]
+        [TestCase(A, C, ExpectedResult = false)]
+        [TestCase(B, C, ExpectedResult = false)]
+        [TestCase(A, B, C, ExpectedResult = true)]
+        public bool IsSupersetOf_AB(params E[] elements)
+        {
+            return EnumSet.Of(elements).IsSupersetOf(EnumSet.Of(A, B));
         }
     }
 }
