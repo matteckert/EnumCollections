@@ -7,7 +7,8 @@ namespace EnumCollections
 {
     public class EnumSet<T> : ISet<T>
     {
-        private static readonly T[] Value = Enum.GetValues(typeof(T)).Cast<T>().Distinct().ToArray();
+        private static readonly T[] Value = Enum.GetValues(typeof(T))
+            .Cast<T>().Distinct().ToArray();
         private static readonly IDictionary<T, int> BitPosition = new Dictionary<T, int>();
 
         static EnumSet()
@@ -45,7 +46,8 @@ namespace EnumCollections
                 Add(e);
         }
 
-        public bool SetEquals(IEnumerable<T> other) => _elements == EnumSetFrom(other)._elements;
+        public bool SetEquals(IEnumerable<T> other) => 
+            _elements == EnumSetFrom(other)._elements;
 
         private static EnumSet<T> EnumSetFrom(IEnumerable<T> other)
         {
@@ -68,16 +70,26 @@ namespace EnumCollections
             return added;
         }
 
-        void ICollection<T>.Add(T item) => Add(item);
-
-        public bool Contains(T item) => (_elements & 1UL << BitPosition[item]) != 0;
-
-        public void SymmetricExceptWith(IEnumerable<T> other) => _elements ^= EnumSetFrom(other)._elements;
-
-        public void ExceptWith(IEnumerable<T> other)
+        public bool Remove(T item)
         {
-            throw new NotImplementedException();
+            var previous = _elements;
+            _elements &= ~(1UL << BitPosition[item]);
+            var removed = _elements != previous;
+            if (removed) Count--;
+            return removed;
         }
+
+        void ICollection<T>.Add(T item) => 
+            Add(item);
+
+        public bool Contains(T item) => 
+            (_elements & 1UL << BitPosition[item]) != 0;
+
+        public void SymmetricExceptWith(IEnumerable<T> other) => 
+            _elements ^= EnumSetFrom(other)._elements;
+
+        public void ExceptWith(IEnumerable<T> other) =>
+            _elements &= ~EnumSetFrom(other)._elements;
 
         public void IntersectWith(IEnumerable<T> other)
         {
@@ -124,11 +136,6 @@ namespace EnumCollections
             throw new NotImplementedException();
         }
 
-        public bool Remove(T item)
-        {
-            throw new NotImplementedException();
-        }
-
         private class Enumerator : IEnumerator<T>
         {
             private readonly EnumSet<T> _enumSet;
@@ -169,6 +176,7 @@ namespace EnumCollections
 
     public abstract class EnumSetTypeConstrainer<TClass> where TClass : class
     {
-        public static EnumSet<T> Of<T>(params T[] list) where T : struct, TClass => new EnumSet<T>(list);
+        public static EnumSet<T> Of<T>(params T[] list) where T : struct, TClass => 
+            new EnumSet<T>(list);
     }
 }
