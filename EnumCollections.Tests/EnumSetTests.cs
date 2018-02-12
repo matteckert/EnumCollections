@@ -16,6 +16,27 @@ namespace EnumCollections.Tests
         }
 
         [TestFixture]
+        public class ReadMeTest
+        {
+            public enum Bird
+            {
+                BlueJay,        // 0
+                Stork,          // 1
+                Puffin,         // 2
+                SeaParrot = 2,  // 2
+                Chicken         // 3
+            }
+
+            [Test]
+            public void WhenEnumValuesAreTheSame_ThenEnumValueNamesAreAliases()
+            {
+                var a = EnumSet.Of(Bird.Puffin);
+                var b = EnumSet.Of(Bird.SeaParrot);
+                Assert.That(a, Is.EqualTo(b));
+            }
+        }
+
+        [TestFixture]
         public class GivenAnEnum
         {
             [Test, TestCaseSource(nameof(WhenEnumTypeArgumentPassedToOf_ThenEnumSetOfThatEnumCreated_Cases))]
