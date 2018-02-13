@@ -1,4 +1,4 @@
-EnumCollections
+![logo](logo.png) EnumCollections
 ===============
 
 Port of Java's EnumSet collection to C#
