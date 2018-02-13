@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Matt Eckert</Authors>
+    <Company />
+    <Description>Port of Java's EnumSet</Description>
+    <Copyright>Apache 2.0</Copyright>
+    <PackageLicenseUrl>https://github.com/matteckert/EnumCollections/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/matteckert/EnumCollections</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/matteckert/EnumCollections/master/logo.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/matteckert/EnumCollections</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>enum enums collection collections java enumset</PackageTags>
+    <PackageReleaseNotes>First release</PackageReleaseNotes>
+    <Version>2.0.2</Version>
   </PropertyGroup>
 
 </Project>
