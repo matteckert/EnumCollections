@@ -40,7 +40,7 @@ namespace EnumCollections.Tests
         public class GivenAnEnum
         {
             [Test, TestCaseSource(nameof(WhenEnumTypeArgumentPassedToOf_ThenEnumSetOfThatEnumCreated_Cases))]
-            public void WhenEnumTypeArgumentPassedToOf_ThenEnumSetOfThatEnumCreated<T>(EnumSet<T> set, Type type)
+            public void WhenEnumTypeArgumentPassedToOf_ThenEnumSetOfThatEnumCreated<T>(EnumSet<T> set, Type type) where T : struct, Enum
             {
                 Assert.That(set, Is.InstanceOf(type));
             }
@@ -56,7 +56,7 @@ namespace EnumCollections.Tests
         public class GivenAnEnumSet
         {
             [Test, TestCaseSource(nameof(WhenCreatedWithNoElements_ThenEmpty_Cases))]
-            public void WhenCreatedWithNoElements_ThenEmpty<T>(EnumSet<T> set)
+            public void WhenCreatedWithNoElements_ThenEmpty<T>(EnumSet<T> set) where T : struct, Enum
             {
                 Assert.That(set, Is.Empty);
             }
@@ -68,7 +68,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenCreated_ThenCountIsNumberOfElements_Cases))]
-            public int WhenCreated_ThenCountIsNumberOfElements<T>(EnumSet<T> set)
+            public int WhenCreated_ThenCountIsNumberOfElements<T>(EnumSet<T> set) where T : struct, Enum
             {
                 return set.Count;
             }
@@ -76,7 +76,7 @@ namespace EnumCollections.Tests
             private static IEnumerable WhenCreated_ThenCountIsNumberOfElements_Cases()
             {
                 yield return Case(EnumSet.Of<SmallEnum>()).Returns(0);
-                yield return Case(EnumSet.Of(A)).Returns(1);
+                yield return Case(EnumSet.Of<SmallEnum>(A)).Returns(1);
                 yield return Case(EnumSet.Of(B, C)).Returns(2);
                 yield return Case(EnumSet.Of(A, B, C)).Returns(3);
                 yield return Case(EnumSet.Of<LargeEnum>()).Returns(0);
@@ -86,7 +86,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenCreated_ThenOnlyContainsElementsCreatedWith_Cases))]
-            public bool WhenCreated_ThenOnlyContainsElementsCreatedWith<T>(EnumSet<T> set, T element)
+            public bool WhenCreated_ThenOnlyContainsElementsCreatedWith<T>(EnumSet<T> set, T element) where T : struct, Enum
             {
                 return set.Contains(element);
             }
@@ -103,7 +103,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenElementsAdded_ThenCountIsTotalNumberOfElements_Cases))]
-            public int WhenElementsAdded_ThenCountIsTotalNumberOfElements<T>(EnumSet<T> set, List<T> elements)
+            public int WhenElementsAdded_ThenCountIsTotalNumberOfElements<T>(EnumSet<T> set, List<T> elements) where T : struct, Enum
             {
                 foreach (var e in elements)
                     set.Add(e);
@@ -112,7 +112,7 @@ namespace EnumCollections.Tests
 
             private static IEnumerable WhenElementsAdded_ThenCountIsTotalNumberOfElements_Cases()
             {
-                yield return Case(EnumSet.Of<SmallEnum>(), new List<SmallEnum> {A}).Returns(1);
+                yield return Case(EnumSet.Of<SmallEnum>(), new List<SmallEnum> { A }).Returns(1);
                 yield return Case(EnumSet.Of<SmallEnum>(), new List<SmallEnum> { A, B, C }).Returns(3);
                 yield return Case(EnumSet.Of(A), new List<SmallEnum> { A, B }).Returns(2);
                 yield return Case(EnumSet.Of<LargeEnum>(), new List<LargeEnum> { E00 }).Returns(1);
@@ -121,7 +121,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenElementsRemoved_ThenCountIsRemainingNumberOfElements_Cases))]
-            public int WhenElementsRemoved_ThenCountIsRemainingNumberOfElements<T>(EnumSet<T> set, List<T> elements)
+            public int WhenElementsRemoved_ThenCountIsRemainingNumberOfElements<T>(EnumSet<T> set, List<T> elements) where T : struct, Enum
             {
                 foreach (var e in elements)
                     set.Remove(e);
@@ -130,7 +130,7 @@ namespace EnumCollections.Tests
 
             private static IEnumerable WhenElementsRemoved_ThenCountIsRemainingNumberOfElements_Cases()
             {
-                yield return Case(EnumSet.Of(A, B), new List<SmallEnum> {A}).Returns(1);
+                yield return Case(EnumSet.Of(A, B), new List<SmallEnum> { A }).Returns(1);
                 yield return Case(EnumSet.Of(A, B, C), new List<SmallEnum> { B, C }).Returns(1);
                 yield return Case(EnumSet.Of(A), new List<SmallEnum> { A }).Returns(0);
                 yield return Case(EnumSet.Of(E00, E01), new List<LargeEnum> { E00 }).Returns(1);
@@ -139,7 +139,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenComparedToNull_ThenThrows_Cases))]
-            public void WhenComparedToNull_ThenThrows<T>(EnumSet<T> set)
+            public void WhenComparedToNull_ThenThrows<T>(EnumSet<T> set) where T : struct, Enum
             {
                 Assert.That(() => set.SetEquals(null), Throws.ArgumentNullException);
             }
@@ -151,7 +151,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenCleared_SetIsEmpty_Cases))]
-            public void WhenCleared_SetIsEmpty<T>(EnumSet<T> set)
+            public void WhenCleared_SetIsEmpty<T>(EnumSet<T> set) where T : struct, Enum
             {
                 set.Clear();
                 Assert.That(set, Is.Empty);
@@ -167,7 +167,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenCopyToNullArray_ThenThrows_Cases))]
-            public void WhenCopyToNullArray_ThenThrows<T>(EnumSet<T> set )
+            public void WhenCopyToNullArray_ThenThrows<T>(EnumSet<T> set) where T : struct, Enum
             {
                 Assert.That(() => set.CopyTo(null, 0), Throws.ArgumentNullException);
             }
@@ -179,9 +179,9 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenCopyToArrayWithTooFewElements_ThenThrows_Cases))]
-            public void WhenCopyToArrayWithTooFewElements_ThenThrows<T>(EnumSet<T> set, int size )
+            public void WhenCopyToArrayWithTooFewElements_ThenThrows<T>(EnumSet<T> set, int size) where T : struct, Enum
             {
-                Assert.That(()=> set.CopyTo(new T[size], 0), Throws.ArgumentException);
+                Assert.That(() => set.CopyTo(new T[size], 0), Throws.ArgumentException);
             }
 
             private static IEnumerable WhenCopyToArrayWithTooFewElements_ThenThrows_Cases()
@@ -191,7 +191,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenCopyToIndexWithTooFewElementsRemaining_ThenThrows_Cases))]
-            public void WhenCopyToIndexWithTooFewElementsRemaining_ThenThrows<T>(EnumSet<T> set, int size, int index )
+            public void WhenCopyToIndexWithTooFewElementsRemaining_ThenThrows<T>(EnumSet<T> set, int size, int index) where T : struct, Enum
             {
                 Assert.That(() => set.CopyTo(new T[size], index), Throws.ArgumentException);
             }
@@ -203,7 +203,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenCopyToIndexIsLessThanZero_ThenThrows_Cases))]
-            public void WhenCopyToIndexIsLessThanZero_ThenThrows<T>(EnumSet<T> set )
+            public void WhenCopyToIndexIsLessThanZero_ThenThrows<T>(EnumSet<T> set) where T : struct, Enum
             {
                 Assert.That(() => set.CopyTo(new T[1], -1), Throws.TypeOf<ArgumentOutOfRangeException>());
             }
@@ -215,7 +215,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenCopyToArray_ArrayHasAllElements_Cases))]
-            public void WhenCopyToArray_ArrayHasAllElements<T>(EnumSet<T> set, int size )
+            public void WhenCopyToArray_ArrayHasAllElements<T>(EnumSet<T> set, int size) where T : struct, Enum
             {
                 var array = new T[size];
                 set.CopyTo(array, 0);
@@ -235,7 +235,7 @@ namespace EnumCollections.Tests
         public class GivenTwoEnumSetsOfTheSameEnum
         {
             [Test, TestCaseSource(nameof(WhenSetEquals_ThenTrueIfSameElements_Cases))]
-            public bool WhenSetEquals_ThenTrueIfSameElements<T>(EnumSet<T> a, EnumSet<T> b)
+            public bool WhenSetEquals_ThenTrueIfSameElements<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 return a.SetEquals(b);
             }
@@ -253,7 +253,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenSymmetricExceptWith_ThenDifferentElementsKept_Cases))]
-            public EnumSet<T> WhenSymmetricExceptWith_ThenDifferentElementsKept<T>(EnumSet<T> a, EnumSet<T> b )
+            public EnumSet<T> WhenSymmetricExceptWith_ThenDifferentElementsKept<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 a.SymmetricExceptWith(b);
                 return a;
@@ -267,7 +267,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenExceptWith_ThenSameElementsRemoved_Cases))]
-            public EnumSet<T> WhenExceptWith_ThenSameElementsRemoved<T>(EnumSet<T> a, EnumSet<T> b)
+            public EnumSet<T> WhenExceptWith_ThenSameElementsRemoved<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 a.ExceptWith(b);
                 return a;
@@ -281,7 +281,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenIntersectWith_ThenOnlySameElementsKept_Cases))]
-            public EnumSet<T> WhenIntersectWith_ThenOnlySameElementsKept<T>(EnumSet<T> a, EnumSet<T> b )
+            public EnumSet<T> WhenIntersectWith_ThenOnlySameElementsKept<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 a.IntersectWith(b);
                 return a;
@@ -295,7 +295,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenUnionWith_ThenDifferentElementsAdded_Cases))]
-            public EnumSet<T> WhenUnionWith_ThenDifferentElementsAdded<T>(EnumSet<T> a, EnumSet<T> b)
+            public EnumSet<T> WhenUnionWith_ThenDifferentElementsAdded<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 a.UnionWith(b);
                 return a;
@@ -308,7 +308,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenIsProperSubsetOf_ThenTrueIfStrictSubset_Cases))]
-            public bool WhenIsProperSubsetOf_ThenReturnsIfStrictSubset<T>(EnumSet<T> a, EnumSet<T> b )
+            public bool WhenIsProperSubsetOf_ThenReturnsIfStrictSubset<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 return a.IsProperSubsetOf(b);
             }
@@ -327,7 +327,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenIsSubsetOf_ThenTrueIfSubset_Cases))]
-            public bool WhenIsSubsetOf_ThenTrueIfSubset<T>(EnumSet<T> a, EnumSet<T> b )
+            public bool WhenIsSubsetOf_ThenTrueIfSubset<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 return a.IsSubsetOf(b);
             }
@@ -346,7 +346,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenIsProperSupersetOf_ThenTrueIfStrictSuperset_Cases))]
-            public bool WhenIsProperSupersetOf_ThenTrueIfStrictSuperset<T>(EnumSet<T> a, EnumSet<T> b )
+            public bool WhenIsProperSupersetOf_ThenTrueIfStrictSuperset<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 return a.IsProperSupersetOf(b);
             }
@@ -365,7 +365,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenIsSupersetOf_ThenTrueIfSuperset_Cases))]
-            public bool WhenIsSupersetOf_ThenTrueIfSuperset<T>(EnumSet<T> a, EnumSet<T> b )
+            public bool WhenIsSupersetOf_ThenTrueIfSuperset<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 return a.IsSupersetOf(b);
             }
@@ -384,7 +384,7 @@ namespace EnumCollections.Tests
             }
 
             [Test, TestCaseSource(nameof(WhenOverlaps_ThenTrueWhenSomeElementsShared_Cases))]
-            public bool WhenOverlaps_ThenTrueWhenSomeElementsShared<T>(EnumSet<T> a, EnumSet<T> b )
+            public bool WhenOverlaps_ThenTrueWhenSomeElementsShared<T>(EnumSet<T> a, EnumSet<T> b) where T : struct, Enum
             {
                 return a.Overlaps(b);
             }
