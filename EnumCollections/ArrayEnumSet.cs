@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace EnumCollections
 {
-    public sealed class ArrayEnumSet<T> : EnumSet<T>
+    public sealed class ArrayEnumSet<T> : EnumSet<T> where T : struct, Enum
     {
         private static readonly T[] Value = Enum.GetValues(typeof(T))
             .Cast<T>().Distinct().ToArray();

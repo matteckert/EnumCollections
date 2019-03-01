@@ -4,15 +4,26 @@ using System.Collections.Generic;
 
 namespace EnumCollections
 {
-    public abstract class EnumSet<T> : ISet<T>
+    public static class EnumSet
+    {
+        public static EnumSet<TEnum> Of<TEnum>(params TEnum[] list) where TEnum : struct, Enum
+        {
+            if (Enum.GetValues(typeof(TEnum)).Length > 64)
+                return new ArrayEnumSet<TEnum>(list);
+            return new ScalarEnumSet<TEnum>(list);
+        }
+    }
+    public abstract class EnumSet<T> : ISet<T> where T : struct, Enum
     {
         public abstract IEnumerator<T> GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => 
             GetEnumerator();
 
-        void ICollection<T>.Add(T item) => 
+        void ICollection<T>.Add(T item) 
+        {
             Add(item);
+        }
 
         public bool IsReadOnly => false;
 
@@ -45,10 +56,5 @@ namespace EnumCollections
             if (argument == null)
                 throw new ArgumentNullException(name);
         }
-    }
-
-    public sealed class EnumSet : EnumSetFactory<Enum>
-    {
-        private EnumSet() { }
     }
 }
