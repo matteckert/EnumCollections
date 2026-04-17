@@ -8,6 +8,7 @@
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageProjectUrl>https://github.com/matteckert/EnumCollections</PackageProjectUrl>
         <PackageIcon>logo.png</PackageIcon>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
         <RepositoryUrl>https://github.com/matteckert/EnumCollections</RepositoryUrl>
         <RepositoryType>GitHub</RepositoryType>
         <PackageTags>enum enums collection collections java enumset</PackageTags>
@@ -16,6 +17,9 @@
         <LangVersion>14</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-        <None Include="logo.png" Pack="true" PackagePath=""/>
+        <None Include="../logo.png" Pack="true" PackagePath=""/>
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="../README.md" Pack="true" PackagePath=""/>
     </ItemGroup>
 </Project>
