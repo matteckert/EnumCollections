@@ -7,10 +7,8 @@ namespace EnumCollections
 {
     public sealed class ArrayEnumSet<T> : EnumSet<T> where T : struct, Enum
     {
-        private static readonly T[] Value = Enum.GetValues(typeof(T))
-            .Cast<T>().Distinct().ToArray();
-
-        private static readonly IDictionary<T, int> BitPosition = new Dictionary<T, int>();
+        private static readonly T[] Value = Enum.GetValues<T>().Distinct().ToArray();
+        private static readonly Dictionary<T, int> BitPosition = new();
 
         static ArrayEnumSet()
         {
@@ -38,7 +36,7 @@ namespace EnumCollections
 
         private static ArrayEnumSet<T> EnumSetFrom(IEnumerable<T> other)
         {
-            ThrowIfNull(other, nameof(other));
+            ArgumentNullException.ThrowIfNull(other);
             return other as ArrayEnumSet<T> ?? new ArrayEnumSet<T>(other);
         }
 
@@ -67,7 +65,7 @@ namespace EnumCollections
         public override void SymmetricExceptWith(IEnumerable<T> other) =>
             ForOther(other, (i, a, b) => a[i] ^= b[i]);
 
-        public void ForOther(IEnumerable<T> other, Action<int, ulong[], ulong[]> action)
+        private void ForOther(IEnumerable<T> other, Action<int, ulong[], ulong[]> action)
         {
             var otherSet = EnumSetFrom(other);
             for (var i = 0; i < _elements.Length; i++)
@@ -112,31 +110,24 @@ namespace EnumCollections
 
         public override void CopyTo(T[] array, int index)
         {
-            ThrowIfNull(array, nameof(array));
-            if (index < 0)
-                throw new ArgumentOutOfRangeException(nameof(index));
+            ArgumentNullException.ThrowIfNull(array);
+            ArgumentOutOfRangeException.ThrowIfNegative(index);
             if (Count > array.Length - index)
                 throw new ArgumentException("Not enough space in " + nameof(array));
             foreach (var e in this)
                 array[index++] = e;
         }
 
-        private class Enumerator : IEnumerator<T>
+        private class Enumerator(ArrayEnumSet<T> enumSet) : IEnumerator<T>
         {
-            private readonly ArrayEnumSet<T> _enumSet;
             private int _currentBit;
-
-            public Enumerator(ArrayEnumSet<T> enumSet)
-            {
-                _enumSet = enumSet;
-            }
 
             public bool MoveNext()
             {
-                if (_enumSet.Count == 0) return false;
+                if (enumSet.Count == 0) return false;
                 for (var i = _currentBit; i < Value.Length; i++)
                 {
-                    if ((_enumSet._elements[GetBucket(Value[i])] & (1UL << i)) == 0) continue;
+                    if ((enumSet._elements[GetBucket(Value[i])] & (1UL << i)) == 0) continue;
                     Current = Value[i];
                     _currentBit = i + 1;
                     return true;

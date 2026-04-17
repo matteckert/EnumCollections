@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="EnumCollections.Tests/EnumCollections.Tests.csproj">
+    <BuildDependency Project="EnumCollections/EnumCollections.csproj" />
+  </Project>
+  <Project Path="EnumCollections/EnumCollections.csproj" />
+</Solution>

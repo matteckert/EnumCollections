@@ -8,7 +8,7 @@ namespace EnumCollections
     {
         public static EnumSet<TEnum> Of<TEnum>(params TEnum[] list) where TEnum : struct, Enum
         {
-            if (Enum.GetValues(typeof(TEnum)).Length > 64)
+            if (Enum.GetValues<TEnum>().Length > 64)
                 return new ArrayEnumSet<TEnum>(list);
             return new ScalarEnumSet<TEnum>(list);
         }
@@ -17,13 +17,9 @@ namespace EnumCollections
     {
         public abstract IEnumerator<T> GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator() => 
-            GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        void ICollection<T>.Add(T item) 
-        {
-            Add(item);
-        }
+        void ICollection<T>.Add(T item) => Add(item);
 
         public bool IsReadOnly => false;
 
@@ -49,12 +45,6 @@ namespace EnumCollections
             v = v - (v >> 1 & 0x5555555555555555UL);
             v = (v & 0x3333333333333333UL) + (v >> 2 & 0x3333333333333333UL);
             return (v + (v >> 4) & 0xF0F0F0F0F0F0F0FUL) * 0x101010101010101UL >> 56;
-        }
-
-        internal static void ThrowIfNull(object argument, string name)
-        {
-            if (argument == null)
-                throw new ArgumentNullException(name);
         }
     }
 }

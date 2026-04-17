@@ -18,7 +18,7 @@ namespace EnumCollections.Tests
         [TestFixture]
         public class ReadMeTest
         {
-            public enum Bird
+            private enum Bird
             {
                 BlueJay,        // 0
                 Stork,          // 1
@@ -76,7 +76,7 @@ namespace EnumCollections.Tests
             private static IEnumerable WhenCreated_ThenCountIsNumberOfElements_Cases()
             {
                 yield return Case(EnumSet.Of<SmallEnum>()).Returns(0);
-                yield return Case(EnumSet.Of<SmallEnum>(A)).Returns(1);
+                yield return Case(EnumSet.Of(A)).Returns(1);
                 yield return Case(EnumSet.Of(B, C)).Returns(2);
                 yield return Case(EnumSet.Of(A, B, C)).Returns(3);
                 yield return Case(EnumSet.Of<LargeEnum>()).Returns(0);
@@ -141,7 +141,7 @@ namespace EnumCollections.Tests
             [Test, TestCaseSource(nameof(WhenComparedToNull_ThenThrows_Cases))]
             public void WhenComparedToNull_ThenThrows<T>(EnumSet<T> set) where T : struct, Enum
             {
-                Assert.That(() => set.SetEquals(null), Throws.ArgumentNullException);
+                Assert.That(() => set.SetEquals(null!), Throws.ArgumentNullException);
             }
 
             private static IEnumerable WhenComparedToNull_ThenThrows_Cases()
@@ -169,7 +169,7 @@ namespace EnumCollections.Tests
             [Test, TestCaseSource(nameof(WhenCopyToNullArray_ThenThrows_Cases))]
             public void WhenCopyToNullArray_ThenThrows<T>(EnumSet<T> set) where T : struct, Enum
             {
-                Assert.That(() => set.CopyTo(null, 0), Throws.ArgumentNullException);
+                Assert.That(() => set.CopyTo(null!, 0), Throws.ArgumentNullException);
             }
 
             private static IEnumerable WhenCopyToNullArray_ThenThrows_Cases()

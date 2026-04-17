@@ -7,17 +7,15 @@ namespace EnumCollections
 {
     public sealed class ScalarEnumSet<T> : EnumSet<T> where T : struct, Enum
     {
-        private static readonly T[] Value = Enum.GetValues(typeof(T))
-            .Cast<T>().Distinct().ToArray();
-        private static readonly IDictionary<T, int> BitPosition = new Dictionary<T, int>();
+        private static readonly T[] Value = Enum.GetValues<T>().Distinct().ToArray();
+        private static readonly Dictionary<T, int> BitPosition = new();
 
         static ScalarEnumSet()
         {
             if (Value.Length > 64)
                 throw new ArgumentException("Enum must have 64 constants or less");
             for (var i = 0; i < Value.Length; i++)
-                if (!BitPosition.ContainsKey(Value[i]))
-                    BitPosition.Add(Value[i], i);
+                BitPosition.TryAdd(Value[i], i);
         }
 
         public override int Count => (int) CountBits(_elements);
@@ -35,7 +33,7 @@ namespace EnumCollections
 
         private static ScalarEnumSet<T> EnumSetFrom(IEnumerable<T> other)
         {
-            ThrowIfNull(other, nameof(other));
+            ArgumentNullException.ThrowIfNull(other);
             return other as ScalarEnumSet<T> ?? new ScalarEnumSet<T>(other);
         }
 
@@ -94,9 +92,8 @@ namespace EnumCollections
 
         public override void CopyTo(T[] array, int index)
         {
-            ThrowIfNull(array, nameof(array));
-            if (index < 0)
-                throw new ArgumentOutOfRangeException(nameof(index));
+            ArgumentNullException.ThrowIfNull(array);
+            ArgumentOutOfRangeException.ThrowIfNegative(index);
             if (Count > array.Length - index)
                 throw new ArgumentException("Not enough space in " + nameof(array));
             foreach (var e in this)
@@ -106,22 +103,16 @@ namespace EnumCollections
         public override IEnumerator<T> GetEnumerator() =>
             new Enumerator(this);
 
-        private class Enumerator : IEnumerator<T>
+        private class Enumerator(ScalarEnumSet<T> enumSet) : IEnumerator<T>
         {
-            private readonly ScalarEnumSet<T> _enumSet;
             private int _currentBit;
-
-            public Enumerator(ScalarEnumSet<T> enumSet)
-            {
-                _enumSet = enumSet;
-            }
 
             public bool MoveNext()
             {
-                if (_enumSet.Count == 0) return false;
+                if (enumSet.Count == 0) return false;
                 for (var i = _currentBit; i < Value.Length; i++)
                 {
-                    if ((_enumSet._elements & (1UL << i)) == 0) continue;
+                    if ((enumSet._elements & (1UL << i)) == 0) continue;
                     Current = Value[i];
                     _currentBit = i + 1;
                     return true;
