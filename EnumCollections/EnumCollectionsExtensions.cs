@@ -1,6 +1,6 @@
 ﻿namespace EnumCollections;
 
-public static class EnumCollectionsExtensions
+internal static class EnumCollectionsExtensions
 {
     public static ulong CountSetBits(this ulong v)
     {
