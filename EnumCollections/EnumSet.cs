@@ -6,45 +6,79 @@ namespace EnumCollections
 {
     public static class EnumSet
     {
-        public static EnumSet<TEnum> Of<TEnum>(params TEnum[] list) where TEnum : struct, Enum
-        {
-            if (Enum.GetValues<TEnum>().Length > 64)
-                return new ArrayEnumSet<TEnum>(list);
-            return new ScalarEnumSet<TEnum>(list);
-        }
+        public static EnumSet<T> Of<T>(params IEnumerable<T> list) where T : struct, Enum => 
+            new(list);
     }
-    public abstract class EnumSet<T> : ISet<T> where T : struct, Enum
+    
+    public class EnumSet<T>(params IEnumerable<T> items) : ISet<T> where T : struct, Enum
     {
-        public abstract IEnumerator<T> GetEnumerator();
+        private readonly ISet<T> _set = InitializeEnumSet(items);
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => 
+            GetEnumerator();
 
-        void ICollection<T>.Add(T item) => Add(item);
+        void ICollection<T>.Add(T item) => 
+            Add(item);
 
-        public bool IsReadOnly => false;
+        public bool IsReadOnly => 
+            _set.IsReadOnly;
 
-        public abstract void ExceptWith(IEnumerable<T> other);
-        public abstract void IntersectWith(IEnumerable<T> other);
-        public abstract bool IsProperSubsetOf(IEnumerable<T> other);
-        public abstract bool IsProperSupersetOf(IEnumerable<T> other);
-        public abstract bool IsSubsetOf(IEnumerable<T> other);
-        public abstract bool IsSupersetOf(IEnumerable<T> other);
-        public abstract bool Overlaps(IEnumerable<T> other);
-        public abstract bool SetEquals(IEnumerable<T> other);
-        public abstract void SymmetricExceptWith(IEnumerable<T> other);
-        public abstract void UnionWith(IEnumerable<T> other);
-        public abstract bool Add(T item);
-        public abstract void Clear();
-        public abstract bool Contains(T item);
-        public abstract void CopyTo(T[] array, int arrayIndex);
-        public abstract bool Remove(T item);
-        public abstract int Count { get; }
+        public IEnumerator<T> GetEnumerator() => 
+            _set.GetEnumerator();
+        
+        public void ExceptWith(IEnumerable<T> other) => 
+            _set.ExceptWith(other);
+        
+        public void IntersectWith(IEnumerable<T> other) => 
+            _set.IntersectWith(other);
+        
+        public bool IsProperSubsetOf(IEnumerable<T> other) => 
+            _set.IsProperSubsetOf(other);
+        
+        public bool IsProperSupersetOf(IEnumerable<T> other) => 
+            _set.IsProperSupersetOf(other);
+        
+        public bool IsSubsetOf(IEnumerable<T> other) => 
+            _set.IsSubsetOf(other);
 
-        internal static ulong CountBits(ulong v)
+        public bool IsSupersetOf(IEnumerable<T> other) => 
+            _set.IsSupersetOf(other);
+
+        public bool Overlaps(IEnumerable<T> other) => 
+            _set.Overlaps(other);
+
+        public bool SetEquals(IEnumerable<T> other) => 
+            _set.SetEquals(other);
+
+        public void SymmetricExceptWith(IEnumerable<T> other) => 
+            _set.SymmetricExceptWith(other);
+
+        public void UnionWith(IEnumerable<T> other) =>
+            _set.UnionWith(other);
+
+        public bool Add(T item) => 
+            _set.Add(item);
+
+        public void Clear() => 
+            _set.Clear();
+
+        public bool Contains(T item) => 
+            _set.Contains(item);
+
+        public void CopyTo(T[] array, int arrayIndex) => 
+            _set.CopyTo(array, arrayIndex);
+
+        public bool Remove(T item) => 
+            _set.Remove(item);
+
+        public int Count => 
+            _set.Count;
+        
+        private static ISet<T> InitializeEnumSet(IEnumerable<T> other)
         {
-            v = v - (v >> 1 & 0x5555555555555555UL);
-            v = (v & 0x3333333333333333UL) + (v >> 2 & 0x3333333333333333UL);
-            return (v + (v >> 4) & 0xF0F0F0F0F0F0F0FUL) * 0x101010101010101UL >> 56;
+            return Enum.GetValues<T>().Length > 64 ? 
+                new ArrayEnumSet<T>(other) :
+                new ScalarEnumSet<T>(other);
         }
     }
 }

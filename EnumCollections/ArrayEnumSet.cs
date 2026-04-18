@@ -5,50 +5,46 @@ using System.Linq;
 
 namespace EnumCollections
 {
-    public sealed class ArrayEnumSet<T> : EnumSet<T> where T : struct, Enum
+    internal sealed class ArrayEnumSet<T> : ISet<T> where T : struct, Enum
     {
-        private static readonly T[] Value = Enum.GetValues<T>().Distinct().ToArray();
+        private static readonly T[] EnumValues = Enum.GetValues<T>().Distinct().ToArray();
         private static readonly Dictionary<T, int> BitPosition = new();
-
+        
+        private readonly ulong[] _elements = new ulong[(EnumValues.Length + 63) >> 6];
+        
         static ArrayEnumSet()
         {
-            for (var i = 0; i < Value.Length; i++)
-                if (!BitPosition.ContainsKey(Value[i]))
-                    BitPosition.Add(Value[i], i);
+            for (var i = 0; i < EnumValues.Length; i++)
+                BitPosition.TryAdd(EnumValues[i], i);
         }
-
-        public override int Count => 
-            (int)_elements.Aggregate(0UL, (current, e) => current + CountBits(e));
-
-        private readonly ulong[] _elements = new ulong[(Value.Length + 63) >> 6];
-
-        public override IEnumerator<T> GetEnumerator() => 
-            new Enumerator(this);
-
+        
         internal ArrayEnumSet(IEnumerable<T> other)
         {
             foreach (var e in other)
                 Add(e);
         }
+        
+        public bool IsReadOnly => 
+            false;
 
-        public override bool SetEquals(IEnumerable<T> other) =>
+        public int Count => 
+            (int)_elements.Aggregate(0UL, (current, e) => current + e.CountSetBits());
+
+        public bool SetEquals(IEnumerable<T> other) =>
             !_elements.Where((t, i) => t != EnumSetFrom(other)._elements[i]).Any();
 
-        private static ArrayEnumSet<T> EnumSetFrom(IEnumerable<T> other)
-        {
-            ArgumentNullException.ThrowIfNull(other);
-            return other as ArrayEnumSet<T> ?? new ArrayEnumSet<T>(other);
-        }
-
-        public override bool Add(T item)
+        public bool Add(T item)
         {
             var bucket = BitPosition[item] >> 6;
             var previous = _elements[bucket];
             _elements[bucket] |= 1UL << BitPosition[item];
             return _elements[bucket] != previous;
         }
+        
+        void ICollection<T>.Add(T item) => 
+            Add(item);
 
-        public override bool Remove(T item)
+        public bool Remove(T item)
         {
             var bucket = GetBucket(item);
             var previous = _elements[bucket];
@@ -56,67 +52,56 @@ namespace EnumCollections
             return _elements[bucket] != previous;
         }
 
-        private static int GetBucket(T item) =>
-            BitPosition[item] >> 6;
-
-        public override bool Contains(T item) =>
+        public bool Contains(T item) => 
             (_elements[GetBucket(item)] & 1UL << BitPosition[item]) != 0;
 
-        public override void SymmetricExceptWith(IEnumerable<T> other) =>
+        public void SymmetricExceptWith(IEnumerable<T> other) => 
             ForOther(other, (i, a, b) => a[i] ^= b[i]);
 
-        private void ForOther(IEnumerable<T> other, Action<int, ulong[], ulong[]> action)
-        {
-            var otherSet = EnumSetFrom(other);
-            for (var i = 0; i < _elements.Length; i++)
-                action(i, _elements, otherSet._elements);
-        }
-
-        public override void ExceptWith(IEnumerable<T> other) =>
+        public void ExceptWith(IEnumerable<T> other) =>
             ForOther(other, (i, a, b) => a[i] &= ~b[i]);
 
-        public override void IntersectWith(IEnumerable<T> other) =>
+        public void IntersectWith(IEnumerable<T> other) =>
             ForOther(other, (i, a, b) => a[i] &= b[i]);
 
-        private static bool IsSubset(ArrayEnumSet<T> a, ArrayEnumSet<T> b) =>
-            !a._elements.Where((t, i) => (t & ~b._elements[i]) != 0).Any();
-
-        private static bool IsProperSubset(ArrayEnumSet<T> a, ArrayEnumSet<T> b) =>
-            IsSubset(a, b) && a.Count < b.Count;
-
-        public override bool IsProperSubsetOf(IEnumerable<T> other) =>
+        public bool IsProperSubsetOf(IEnumerable<T> other) =>
             IsProperSubset(this, EnumSetFrom(other));
 
-        public override bool IsSubsetOf(IEnumerable<T> other) =>
+        public bool IsSubsetOf(IEnumerable<T> other) =>
             IsSubset(this, EnumSetFrom(other));
 
-        public override bool IsProperSupersetOf(IEnumerable<T> other) =>
+        public bool IsProperSupersetOf(IEnumerable<T> other) =>
             IsProperSubset(EnumSetFrom(other), this);
 
-        public override bool IsSupersetOf(IEnumerable<T> other) =>
+        public bool IsSupersetOf(IEnumerable<T> other) =>
             IsSubset(EnumSetFrom(other), this);
 
-        public override bool Overlaps(IEnumerable<T> other) =>
+        public bool Overlaps(IEnumerable<T> other) =>
             _elements.Where((t, i) => (t & EnumSetFrom(other)._elements[i]) != 0).Any();
 
-        public override void UnionWith(IEnumerable<T> other) =>
+        public void UnionWith(IEnumerable<T> other) =>
             ForOther(other, (i, a, b) => a[i] |= b[i]);
 
-        public override void Clear()
-        {
-            for (var i = 0; i < _elements.Length; i++)
-                _elements[i] = 0;
-        }
+        public void Clear() => 
+            Array.Clear(_elements, 0, _elements.Length);
 
-        public override void CopyTo(T[] array, int index)
+        public void CopyTo(T[] array, int index)
         {
             ArgumentNullException.ThrowIfNull(array);
             ArgumentOutOfRangeException.ThrowIfNegative(index);
+            
             if (Count > array.Length - index)
                 throw new ArgumentException("Not enough space in " + nameof(array));
+            
             foreach (var e in this)
                 array[index++] = e;
         }
+        
+        public IEnumerator<T> GetEnumerator() => 
+            new Enumerator(this);
+        
+        IEnumerator IEnumerable.GetEnumerator() => 
+            GetEnumerator();
 
         private class Enumerator(ArrayEnumSet<T> enumSet) : IEnumerator<T>
         {
@@ -125,10 +110,10 @@ namespace EnumCollections
             public bool MoveNext()
             {
                 if (enumSet.Count == 0) return false;
-                for (var i = _currentBit; i < Value.Length; i++)
+                for (var i = _currentBit; i < EnumValues.Length; i++)
                 {
-                    if ((enumSet._elements[GetBucket(Value[i])] & (1UL << i)) == 0) continue;
-                    Current = Value[i];
+                    if ((enumSet._elements[GetBucket(EnumValues[i])] & (1UL << i)) == 0) continue;
+                    Current = EnumValues[i];
                     _currentBit = i + 1;
                     return true;
                 }
@@ -139,9 +124,32 @@ namespace EnumCollections
 
             public T Current { get; private set; }
 
-            object IEnumerator.Current => Current;
+            object IEnumerator.Current => 
+                Current;
 
             public void Dispose() { }
+        }
+        
+        private static bool IsSubset(ArrayEnumSet<T> a, ArrayEnumSet<T> b) =>
+            !a._elements.Where((t, i) => (t & ~b._elements[i]) != 0).Any();
+
+        private static bool IsProperSubset(ArrayEnumSet<T> a, ArrayEnumSet<T> b) =>
+            IsSubset(a, b) && a.Count < b.Count;
+        
+        private static int GetBucket(T item) => 
+            BitPosition[item] >> 6;
+        
+        private static ArrayEnumSet<T> EnumSetFrom(IEnumerable<T> other)
+        {
+            ArgumentNullException.ThrowIfNull(other);
+            return other as ArrayEnumSet<T> ?? new ArrayEnumSet<T>(other);
+        }
+        
+        private void ForOther(IEnumerable<T> other, Action<int, ulong[], ulong[]> action)
+        {
+            var otherSet = EnumSetFrom(other);
+            for (var i = 0; i < _elements.Length; i++)
+                action(i, _elements, otherSet._elements);
         }
     }
 }
