@@ -33,8 +33,13 @@ internal sealed class ArrayEnumSet<T> : ISet<T> where T : struct, Enum
     public int Count => 
         (int)_elements.Aggregate(0UL, (current, e) => current + e.CountSetBits());
 
-    public bool SetEquals(IEnumerable<T> other) =>
-        !_elements.Where((t, i) => t != EnumSetFrom(other)._elements[i]).Any();
+    public bool SetEquals(IEnumerable<T> other)
+    {
+        var otherSet = EnumSetFrom(other);
+        for (var i = 0; i < _elements.Length; i++)
+            if (_elements[i] != otherSet._elements[i]) return false;
+        return true;
+    }
 
     public bool Add(T item)
     {
@@ -79,8 +84,13 @@ internal sealed class ArrayEnumSet<T> : ISet<T> where T : struct, Enum
     public bool IsSupersetOf(IEnumerable<T> other) =>
         IsSubset(EnumSetFrom(other), this);
 
-    public bool Overlaps(IEnumerable<T> other) =>
-        _elements.Where((t, i) => (t & EnumSetFrom(other)._elements[i]) != 0).Any();
+    public bool Overlaps(IEnumerable<T> other)
+    {
+        var otherSet = EnumSetFrom(other);
+        for (var i = 0; i < _elements.Length; i++)
+            if ((_elements[i] & otherSet._elements[i]) != 0) return true;
+        return false;
+    }
 
     public void UnionWith(IEnumerable<T> other) =>
         ForOther(other, (i, a, b) => a[i] |= b[i]);
@@ -123,7 +133,8 @@ internal sealed class ArrayEnumSet<T> : ISet<T> where T : struct, Enum
             return false;
         }
 
-        public void Reset() { }
+        public void Reset() => 
+            _currentBit = 0;
 
         public T Current { get; private set; }
 

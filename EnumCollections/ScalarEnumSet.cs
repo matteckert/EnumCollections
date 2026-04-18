@@ -123,7 +123,8 @@ internal sealed class ScalarEnumSet<T> : ISet<T> where T : struct, Enum
             return false;
         }
 
-        public void Reset() { }
+        public void Reset() => 
+            _currentBit = 0;
 
         public T Current { get; private set; }
 
